@@ -32,6 +32,7 @@ class HomeViewModel @Inject constructor(
 
     val location = MutableLiveData("")
     val homeScreenState = MutableLiveData(true)
+    val isDarkMode=MutableLiveData(sharedPreferences.getBoolean("APP_DARK_MODE",false))
 
     val latestTopics = MutableLiveData<List<LateTopics>>(null)
     val latestNewsList = MutableLiveData<List<NewsAPIModel.Article>>(null)
@@ -39,6 +40,7 @@ class HomeViewModel @Inject constructor(
 
 
     fun initHome() {
+        sharedPreferences.edit().putBoolean("APP_DARK_MODE",true).apply()
         getLatestTopics()
         getLocation()
         getLatestNews()
@@ -89,6 +91,11 @@ class HomeViewModel @Inject constructor(
 
             }
         }
+    }
+    fun changeUIMode(value:Boolean)
+    {
+        isDarkMode.postValue(!value)
+        sharedPreferences.edit().putBoolean("APP_DARK_MODE",!value).apply()
     }
     private fun getLatestNews(){
         viewModelScope.launch(Dispatchers.IO) {

@@ -8,7 +8,6 @@ package com.loc.newsapp.presentation.home
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,15 +26,19 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.DrawerState
+import androidx.compose.material.ModalDrawer
+import androidx.compose.material.Switch
+import androidx.compose.material.rememberDrawerState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -58,6 +61,7 @@ import coil.request.ImageRequest
 import com.loc.newsapp.R
 import com.loc.newsapp.data.entity.NewsAPIModel
 import com.loc.newsapp.presentation.reusables.ShimmerEffect
+import com.loc.newsapp.ui.theme.NewsAppTheme
 import kotlinx.coroutines.launch
 
 @Composable
@@ -65,55 +69,76 @@ fun HomeScreen(mViewModel: HomeViewModel) {
     val list = mViewModel.latestTopics.observeAsState()
     val screenHomeState = mViewModel.homeScreenState.observeAsState()
     val newsList = mViewModel.latestNewsList.observeAsState()
-    Column(
-        Modifier
+    val darkModeState = mViewModel.isDarkMode.observeAsState()
+    val drawerState = rememberDrawerState(androidx.compose.material.DrawerValue.Closed)
+    NewsAppTheme(darkTheme = darkModeState.value!!) {
+        ModalDrawer(
+            drawerState =drawerState,
+            drawerContent = {
+                DrawerComponent(modeCheckState =darkModeState.value!!, onChangeCheckState ={
+                    mViewModel.changeUIMode(darkModeState.value!!)
+                })
+            }, content = {
+                Box(modifier = Modifier.background(color = androidx.compose.material3.MaterialTheme.colorScheme.background) )
+                {
+                    Column(
+                        Modifier
+                            .fillMaxSize()
+                            .padding(5.dp)
+                            .background(color = androidx.compose.material3.MaterialTheme.colorScheme.background)
+                    ) {
 
-            .fillMaxSize()
-            .padding(15.dp)
-            .background(Color.White)
-    ) {
-        TopNavRow(mViewModel)
-        Spacer(modifier = Modifier.height(10.dp))
-        LocationComponent(mViewModel)
-        Spacer(modifier = Modifier.height(10.dp))
-        if (!list.value.isNullOrEmpty()) {
-            LazyRow() {
-                items(list.value!!) {
-                    SuggestionComponent(str = it.topic, mViewModel)
-                    Spacer(Modifier.width(5.dp))
-                }
-            }
-        }
+                        TopNavRow(mViewModel, drawerState)
+                        Spacer(modifier = Modifier.height(10.dp))
+                        LocationComponent(mViewModel)
+                        Spacer(modifier = Modifier.height(10.dp))
+                        if (!list.value.isNullOrEmpty()) {
+                            LazyRow() {
+                                items(list.value!!) {
+                                    SuggestionComponent(str = it.topic, mViewModel)
+                                    Spacer(Modifier.width(5.dp))
+                                }
+                            }
+                        }
 
-        if (screenHomeState.value!!) {
-            if (newsList.value != null) {
-                PageBannerComponent(newsList.value!![0])
-                LazyColumn {
-                    items(newsList.value!!.filter {
-                        it.content != "[Removed]"
-                    }) { message ->
-                        NewsBannerComponent(message,mViewModel)
+                        if (screenHomeState.value!!) {
+                            if (newsList.value != null) {
+                                PageBannerComponent(newsList.value!![0],mViewModel)
+                                LazyColumn {
+                                    items(newsList.value!!.filter {
+                                        it.content != "[Removed]"
+                                    }) { message ->
+                                        NewsBannerComponent(message, mViewModel)
+                                    }
+                                }
+
+
+                            } else {
+                                Column(
+                                    Modifier
+                                        .fillMaxSize()
+                                        .padding(vertical = 10.dp),
+                                    verticalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    PageBannerComponent(null,mViewModel)
+                                    NewsBannerComponent(null, mViewModel)
+                                    NewsBannerComponent(null, mViewModel)
+                                    NewsBannerComponent(null, mViewModel)
+                                }
+                            }
+
+                        } else {
+                            CategoryNewsComponents(viewModel = mViewModel)
+                        }
                     }
                 }
 
 
-            } else {
-                Column(
-                    Modifier
-                        .fillMaxSize()
-                        .padding(vertical = 10.dp), verticalArrangement = Arrangement.SpaceBetween
-                ) {
-                    PageBannerComponent(null)
-                    NewsBannerComponent(null,mViewModel)
-                    NewsBannerComponent(null,mViewModel)
-                    NewsBannerComponent(null,mViewModel)
-                }
-            }
 
-        } else {
-            CategoryNewsComponents(viewModel = mViewModel)
-        }
+            })
     }
+//
+
 }
 
 @Composable
@@ -125,7 +150,9 @@ fun SearchTextField(
     onActiveChange: (Boolean) -> Unit
 ) {
     val density = LocalDensity.current
-    AnimatedVisibility(visible = searchState , enter = slideInHorizontally { with(density) { -40.dp.roundToPx() } }) {
+    AnimatedVisibility(
+        visible = searchState,
+        enter = slideInHorizontally { with(density) { -40.dp.roundToPx() } }) {
         OutlinedTextField(
             value = value,
             onValueChange = { text ->
@@ -143,9 +170,12 @@ fun SearchTextField(
                 )
             },
             leadingIcon = {
-                Icon(painter = painterResource(id = R.drawable.ic_search), contentDescription = "search", modifier = Modifier.clickable {
-                    onSearch(value)
-                })
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_search),
+                    contentDescription = "search",
+                    modifier = Modifier.clickable {
+                        onSearch(value)
+                    })
             }
 
         )
@@ -155,11 +185,13 @@ fun SearchTextField(
 
 
 @Composable
-fun TopNavRow(mViewModel: HomeViewModel) {
+fun TopNavRow(mViewModel: HomeViewModel, drawerState: DrawerState) {
     val scope = rememberCoroutineScope()
+    val homeState = mViewModel.homeScreenState.observeAsState()
     val searchState = remember {
         mutableStateOf(false)
     }
+    val isDarkMode by mViewModel.isDarkMode.observeAsState()
     val searchText = remember {
         mutableStateOf("")
     }
@@ -174,32 +206,48 @@ fun TopNavRow(mViewModel: HomeViewModel) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.ic_home),
+                tint=MaterialTheme.colorScheme.onBackground,
+                painter = if (homeState.value!!) painterResource(id =R.drawable.ic_menu_light) else painterResource(
+                    id = R.drawable.ic_home
+                ),
                 contentDescription = null,
-                Modifier
+                modifier = Modifier
                     .size(20.dp)
                     .clickable {
                         scope.launch {
-                            mViewModel.homeScreenState.postValue(true)
+                            if (homeState.value!!) {
+                                if (drawerState.isOpen)
+                                    drawerState.close()
+                                else drawerState.open()
+                            } else mViewModel.homeScreenState.postValue(true)
+
+
                         }
                     }
             )
-            if (searchState.value) SearchTextField(value = searchText.value, onChangeText = { text ->
-                searchText.value = text
-            }, searchState = searchState.value, onSearch = { text ->
-                scope.launch {
-                    mViewModel.newsOnTopic(searchText.value)
-                    searchState.value=false
-                    mViewModel.homeScreenState.postValue(false)
-                }
-            }, onActiveChange = { state ->
-                searchState.value = !state
-            })
+
+            if (searchState.value) SearchTextField(
+                value = searchText.value,
+                onChangeText = { text ->
+                    searchText.value = text
+                },
+                searchState = searchState.value,
+                onSearch = { text ->
+                    scope.launch {
+                        mViewModel.newsOnTopic(searchText.value)
+                        searchState.value = false
+                        mViewModel.homeScreenState.postValue(false)
+                    }
+                },
+                onActiveChange = { state ->
+                    searchState.value = !state
+                })
             else Spacer(modifier = Modifier.fillMaxWidth(0.4f))
             Icon(
-                painter = painterResource(id = R.drawable.ic_search),
+                painter = painterResource(R.drawable.ic_search),
+                tint = MaterialTheme.colorScheme.onBackground,
                 contentDescription = null,
-                Modifier
+                modifier = Modifier
                     .size(20.dp)
                     .clickable {
                         searchState.value = !searchState.value
@@ -220,6 +268,7 @@ fun TopNavRow(mViewModel: HomeViewModel) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LocationComponent(viewModel: HomeViewModel) {
+
     val showBottomSheet = remember {
         mutableStateOf(false)
     }
@@ -239,8 +288,8 @@ fun LocationComponent(viewModel: HomeViewModel) {
                 showBottomSheet.value = true
             }
         }) {
-            Icon(painter = painterResource(id = R.drawable.ic_location), contentDescription = null)
-            Text(text = location!!)
+            Icon(painter =painterResource(id = R.drawable.ic_location), tint = MaterialTheme.colorScheme.onBackground, contentDescription = null)
+            Text(text = location!!, color = MaterialTheme.colorScheme.onBackground)
         }
 
     }
@@ -266,11 +315,11 @@ fun LocationComponent(viewModel: HomeViewModel) {
                         ) {
                             Text(
                                 text = item.country,
-                                color = Color.Black,
+                                color = MaterialTheme.colorScheme.onPrimary,
                                 modifier = Modifier.weight(1f)
                             )
                             Spacer(Modifier.width(10.dp))
-                            Text(text = item.countryCode, color = Color.Black)
+                            Text(text = item.countryCode, color = MaterialTheme.colorScheme.onPrimary)
                         }
 
                     }
@@ -301,7 +350,7 @@ fun SuggestionComponent(str: String, mViewModel: HomeViewModel) {
 }
 
 @Composable
-fun NewsBannerComponent(newsModel: NewsAPIModel.Article?,mViewModel: HomeViewModel) {
+fun NewsBannerComponent(newsModel: NewsAPIModel.Article?, mViewModel: HomeViewModel) {
     if (newsModel != null) {
         val painter = rememberAsyncImagePainter(
             model = ImageRequest.Builder(LocalContext.current)
@@ -336,6 +385,7 @@ fun NewsBannerComponent(newsModel: NewsAPIModel.Article?,mViewModel: HomeViewMod
                 Column(verticalArrangement = Arrangement.SpaceBetween) {
                     Text(
                         text = newsModel.title.toString(),
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                     Spacer(modifier = Modifier.height(5.dp))
                     Text(newsModel.source?.name.toString(), color = Color.LightGray)
@@ -355,8 +405,8 @@ fun NewsBannerComponent(newsModel: NewsAPIModel.Article?,mViewModel: HomeViewMod
 }
 
 @Composable
-fun PageBannerComponent(newsModel: NewsAPIModel.Article?) {
-
+fun PageBannerComponent(newsModel: NewsAPIModel.Article?,mViewModel: HomeViewModel) {
+    val scope = rememberCoroutineScope()
     if (newsModel != null) {
         val painter = rememberAsyncImagePainter(
             model = ImageRequest.Builder(LocalContext.current)
@@ -368,6 +418,11 @@ fun PageBannerComponent(newsModel: NewsAPIModel.Article?) {
         )
         Box(
             modifier = Modifier
+                .clickable {
+                    scope.launch {
+                        mViewModel.urLink.postValue(newsModel.url.toString())
+                    }
+                }
                 .fillMaxWidth()
                 .background(shape = RoundedCornerShape(20.dp), color = Color.Transparent)
                 .height(200.dp)
@@ -405,5 +460,27 @@ fun PageBannerComponent(newsModel: NewsAPIModel.Article?) {
                 .height(200.dp)
                 .padding(vertical = 10.dp),
         )
+    }
+}
+
+@Composable
+fun DrawerComponent(modeCheckState: Boolean, onChangeCheckState: (Boolean) -> Unit) {
+    val scope = rememberCoroutineScope()
+    Column(
+        Modifier
+            .fillMaxSize()
+            .background(androidx.compose.material3.MaterialTheme.colorScheme.background)
+            .padding(10.dp)) {
+        Image(painter = painterResource(id = R.drawable.ic_logo),contentDescription = null,
+            Modifier
+                .height(100.dp)
+                .width(100.dp))
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceAround) {
+                Text(text = "Dark Mode", color = MaterialTheme.colorScheme.onBackground)
+                Switch(checked = modeCheckState, onCheckedChange = { scope.launch{
+                    onChangeCheckState(modeCheckState)
+                } })
+
+        }
     }
 }

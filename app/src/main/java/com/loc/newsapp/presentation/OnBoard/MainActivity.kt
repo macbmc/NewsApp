@@ -39,9 +39,7 @@ class MainActivity : BaseActivity<MainViewModel>() {
         observeAppReadyState()
         installSplashScreen().setKeepOnScreenCondition { keepSplashCondition }
         setContent {
-            NewsAppTheme {
                 OnBoardScreen(mViewModel)
-            }
         }
     }
 

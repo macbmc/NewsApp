@@ -1,6 +1,7 @@
 package com.loc.newsapp.presentation.reusables
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -23,7 +24,7 @@ import com.loc.newsapp.R
 import com.loc.newsapp.data.entity.OnBoardPage
 
 @Composable
-fun OnBoardComponent(page: OnBoardPage, modifier: Modifier = Modifier.fillMaxSize()) {
+fun OnBoardComponent(page: OnBoardPage, modifier: Modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
     val painter = rememberAsyncImagePainter(
         model = ImageRequest.Builder(LocalContext.current)
             .data(page.imageURl)

@@ -33,6 +33,7 @@ class MainViewModel @Inject constructor(@ApplicationContext private val appConte
     private val onBoardUseCase = NetworkOnBoardPageUseCase(networkRepository)
     private  val appOpenUseCase= GetAppOpenSharedPreferenceUseCase(sharedPreferences)
     private  val storeLocationUtils= StoreLocationUtils(appContext,sharedPreferences)
+    val isDarkMode = MutableLiveData(sharedPreferences.getBoolean("APP_DARK_MODE", false))
     val isAppReady = MutableLiveData(false)
     val openHomeState = MutableLiveData(false)
 
