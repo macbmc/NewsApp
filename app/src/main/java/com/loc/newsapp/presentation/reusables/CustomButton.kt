@@ -8,14 +8,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun CustomButton(title:String,onClick:()->Unit) {
+fun CustomButton(title: String, onClick: () -> Unit) {
 
-    Button(onClick = onClick,
-        colors =  ButtonDefaults.buttonColors(
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = Color.White
         ),

@@ -6,55 +6,56 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.loc.newsapp.data.entity.CountryInfo
+import com.loc.newsapp.data.entity.ConnectivityClass
 import com.loc.newsapp.data.entity.OnBoardPage
 import com.loc.newsapp.domain.repositories.NetworkRepository
 import com.loc.newsapp.domain.useCases.GetAppOpenSharedPreferenceUseCase
 import com.loc.newsapp.domain.useCases.NetworkOnBoardPageUseCase
-import com.loc.newsapp.utils.Either
+import com.loc.newsapp.utils.NetworkConnectivityUtils
 import com.loc.newsapp.utils.StoreLocationUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MainViewModel @Inject constructor(@ApplicationContext private val appContext: Context, private val sharedPreferences: SharedPreferences, private val networkRepository: NetworkRepository) :
+class MainViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
+    sharedPreferences: SharedPreferences,
+    networkRepository: NetworkRepository
+) :
     ViewModel() {
 
 
     val onBoardPage = MutableLiveData<List<OnBoardPage>>()
-    val setLocation = MutableLiveData<Boolean>(false)
+    val setLocation = MutableLiveData(false)
 
 
     private val onBoardUseCase = NetworkOnBoardPageUseCase(networkRepository)
-    private  val appOpenUseCase= GetAppOpenSharedPreferenceUseCase(sharedPreferences)
-    private  val storeLocationUtils= StoreLocationUtils(appContext,sharedPreferences)
+    private val appOpenUseCase = GetAppOpenSharedPreferenceUseCase(sharedPreferences)
+    private val storeLocationUtils = StoreLocationUtils(appContext, sharedPreferences)
     val isDarkMode = MutableLiveData(sharedPreferences.getBoolean("APP_DARK_MODE", false))
     val isAppReady = MutableLiveData(false)
     val openHomeState = MutableLiveData(false)
+    val networkStatus = MutableLiveData<ConnectivityClass>()
 
-    fun location()
-    {
+    fun location() {
         viewModelScope.launch {
             getLocation()
         }
     }
 
-   private suspend fun getLocation()
-   {
+    private suspend fun getLocation() {
 
-           Log.d("RESPONSE_COUNTRY", "data")
-           storeLocationUtils.execute().collect{
-               setLocation.postValue(it)
-               Log.d("LOCATIONSTATUS",it.toString())
-           }
+        Log.d("RESPONSE_COUNTRY", "data")
+        storeLocationUtils.execute().collect {
+            setLocation.postValue(it)
+            Log.d("LOCATION_STATUS", it.toString())
+        }
 
 
-   }
+    }
 
     fun getOnBoardData() {
         when (appOpenUseCase.execute()) {
@@ -81,9 +82,17 @@ class MainViewModel @Inject constructor(@ApplicationContext private val appConte
         }
     }
 
-    fun setToHomeState()
-    {
-        Log.e("HOMESTATE","HOME")
+    fun setToHomeState() {
+        Log.e("HOME_STATE", "HOME")
         openHomeState.postValue(true)
+    }
+
+    fun observeNetworkStatus() {
+        viewModelScope.launch(Dispatchers.IO) {
+            NetworkConnectivityUtils(appContext).getNetworkFlow().collect {
+                networkStatus.postValue(it)
+            }
+        }
+
     }
 }

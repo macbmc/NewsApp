@@ -10,6 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.loc.newsapp.BaseActivity
+import com.loc.newsapp.data.entity.ConnectivityClass
+import com.loc.newsapp.presentation.loading.LoadingScreen
 import com.loc.newsapp.ui.theme.NewsAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -35,12 +37,29 @@ class HomeActivity : BaseActivity<HomeViewModel>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mViewModel.initHome()
+        mViewModel.getNetworkStatus()
         openLinkUrl()
-        setContent {
-           HomeScreen(mViewModel = mViewModel)
+        observeNetwork()
+    }
 
+    private fun observeNetwork() {
+        mViewModel.status.observe(this@HomeActivity) {
+            when (it) {
+                is ConnectivityClass.Connected -> {
+                    setContent {
+                        HomeScreen(mViewModel = mViewModel)
+                    }
+                }
+
+                else -> {
+                    setContent {
+                        LoadingScreen()
+                    }
+                }
+            }
         }
     }
+
 }
 
 @Composable

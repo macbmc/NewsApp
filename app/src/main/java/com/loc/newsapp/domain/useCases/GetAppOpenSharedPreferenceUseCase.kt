@@ -1,10 +1,8 @@
 package com.loc.newsapp.domain.useCases
 
 import android.content.SharedPreferences
-import android.util.Log
-import javax.inject.Inject
 
-class GetAppOpenSharedPreferenceUseCase (private val sharedPreferences: SharedPreferences) {
+class GetAppOpenSharedPreferenceUseCase(private val sharedPreferences: SharedPreferences) {
 
 
     fun execute(): Boolean {

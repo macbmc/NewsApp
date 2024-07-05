@@ -3,24 +3,22 @@ package com.loc.newsapp.presentation.OnBoard
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.google.android.gms.location.FusedLocationProviderClient
 import com.loc.newsapp.BaseActivity
+import com.loc.newsapp.data.entity.ConnectivityClass
 import com.loc.newsapp.presentation.home.HomeActivity
-import com.loc.newsapp.ui.theme.NewsAppTheme
+import com.loc.newsapp.presentation.loading.LoadingScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @OptIn(ExperimentalFoundationApi::class)
 @AndroidEntryPoint
 class MainActivity : BaseActivity<MainViewModel>() {
     override val mViewModel: MainViewModel by viewModels()
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var keepSplashCondition = true
 
     private val locationPermission =
@@ -38,9 +36,7 @@ class MainActivity : BaseActivity<MainViewModel>() {
         getCurrentDeviceLocation()
         observeAppReadyState()
         installSplashScreen().setKeepOnScreenCondition { keepSplashCondition }
-        setContent {
-                OnBoardScreen(mViewModel)
-        }
+
     }
 
     private fun getCurrentDeviceLocation() {
@@ -53,36 +49,53 @@ class MainActivity : BaseActivity<MainViewModel>() {
 
 
     private fun observeAppReadyState() {
-        mViewModel.getOnBoardData()
-        mViewModel.isAppReady.observe(this) { appReady ->
-            when (appReady) {
-                true -> {
-                    Log.d("OpenHome-APPREADY",appReady.toString())
-                    mViewModel.openHomeState.observe(this) {
-                        Log.d("OpenHome-OPENHOMESTATE",it.toString())
-                        if (it) {
-                            mViewModel.setLocation.observe(this)
-                            { location ->
-                                Log.d("LOCATIONSTATUSACT",location.toString())
-                                if (location)
-                                    startActivity(
-                                        Intent(
-                                            this@MainActivity,
-                                            HomeActivity::class.java
-                                        )
-                                    )
+        mViewModel.apply {
+            observeNetworkStatus()
+            getOnBoardData()
 
+            isAppReady.observe(this@MainActivity) { appReady ->
+                when (appReady) {
+                    true -> {
+                        keepSplashCondition = false
+                        networkStatus.observe(this@MainActivity) { status ->
+                            when (status) {
+                                is ConnectivityClass.Connected -> {
+                                    openHomeState.observe(this@MainActivity) {
+                                        if (it) {
+                                            setLocation.observe(this@MainActivity)
+                                            { location ->
+                                                if (location) {
+                                                    startActivity(
+                                                        Intent(
+                                                            this@MainActivity,
+                                                            HomeActivity::class.java
+                                                        )
+                                                    )
 
+                                                }
+                                            }
+                                        } else {
+                                            setContent {
+                                                OnBoardScreen(mViewModel)
+                                            }
+                                        }
+                                    }
+                                }
+
+                                else -> setContent { LoadingScreen() }
                             }
                         }
-                    }
-                    keepSplashCondition = false
-                }
 
-                false -> {
-                    keepSplashCondition = true
+
+                    }
+
+                    false -> {
+                        keepSplashCondition = true
+                    }
                 }
             }
         }
     }
 }
+
+

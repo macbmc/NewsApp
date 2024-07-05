@@ -2,7 +2,6 @@ package com.loc.newsapp.data.dataRepositories
 
 import android.content.Context
 import android.util.Log
-import com.loc.newsapp.R
 import com.loc.newsapp.data.entity.CountryInfo
 import com.loc.newsapp.data.entity.LateTopics
 import com.loc.newsapp.data.entity.NewsAPIModel
@@ -26,16 +25,14 @@ class NetworkDataRepository @Inject constructor(
 ) : NetworkRepository {
     override suspend fun getOnBoardData(): Either<List<OnBoardPage>?> {
         try {
-            Log.d("ONBOARDREPO", "called")
             val response = onBoardService.getOnBoardPage(NetworkEndPoints.ONBOARD_ENDPOINT.url)
             if (response.isSuccessful) {
-                Log.d("OnBoardResponse", response.body().toString())
                 return Either.Success(response.body())
             }
         } catch (e: Exception) {
             Log.e("onBoardDATAEXC", e.toString())
         }
-        return Either.Failed(appContext.getString(R.string.Resource_Fetch_Error))
+        return Either.Failed()
     }
 
     override suspend fun getCountryData(): Either<List<CountryInfo>?> {
@@ -43,11 +40,11 @@ class NetworkDataRepository @Inject constructor(
             val response =
                 countryAPIService.getCountryService(NetworkEndPoints.COUNTRIES_ENDPOINT.url)
             if (response.isSuccessful && response.body() != null) {
-                Log.d("RESPONSE_COUNTRY", response.body().toString())
+
 
                 return Either.Success(DataConversion().countryResponseToCountryData(response.body()!!))
             }
-            Log.d("RESPONSE_COUNTRY", response.code().toString())
+
 
         } catch (e: Exception) {
             Log.d("RESPONSE_COUNTRY", e.toString())
@@ -57,19 +54,19 @@ class NetworkDataRepository @Inject constructor(
 
 
         }
-        return Either.Failed("")
+        return Either.Failed()
     }
 
     override suspend fun getLatestTopics(): Either<List<LateTopics>?> {
         try {
-            Log.d("LatestTopics", "REpoCalled")
+
             val response = onBoardService.getLatest(NetworkEndPoints.LATEST_ENDPOINT.url)
             if (response.isSuccessful && response.body() != null) {
-                Log.d("RESPONSE_COUNTY", response.body().toString())
+
 
                 return Either.Success(response.body())
             }
-            Log.d("RESPONSE_COUNTY", response.code().toString())
+
 
         } catch (e: Exception) {
             Log.d("RESPONSE_COUNTY", e.toString())
@@ -79,32 +76,32 @@ class NetworkDataRepository @Inject constructor(
 
 
         }
-        return Either.Failed("")
+        return Either.Failed()
     }
 
     override suspend fun getLatestNewsByCountry(countryCode: String): Either<NewsAPIModel?> {
         try {
-            Log.d("COUNTRYNEWS", countryCode)
+
             val response = newsApiServices.getLatestNewsByCountry(
                 NetworkEndPoints.NEWS_ENDPOINT.url,
                 countryCode
             )
             if (response != null) {
                 if (response.isSuccessful && response.body() != null) {
-                    Log.d("COUNTRYNEWS", response.body().toString())
+
 
                     return Either.Success(response.body())
                 }
             }
-            Log.d("COUNTRYNEWS", response?.code().toString())
+
 
         } catch (e: Exception) {
-            Log.d("COUNTRYNEWS", e.toString())
+            Log.d("COUNTRY_NEWS", e.toString())
             when (e) {
                 is CancellationException -> throw e
             }
         }
-        return Either.Failed("")
+        return Either.Failed()
     }
 
     override suspend fun getNewsByCategory(q: String): Either<NewsAPIModel?> {
@@ -113,12 +110,12 @@ class NetworkDataRepository @Inject constructor(
                 newsApiServices.getLatestNewsCategory(NetworkEndPoints.NEWS_ENDPOINT.url, q)
             if (response != null) {
                 if (response.isSuccessful && response.body() != null) {
-                    Log.d("TopicNEWS", response.body().toString())
+
 
                     return Either.Success(response.body())
                 }
             }
-            Log.d("TopicNEWS", response?.code().toString())
+
 
         } catch (e: Exception) {
             Log.d("TopicNEWS", e.toString())
@@ -126,7 +123,7 @@ class NetworkDataRepository @Inject constructor(
                 is CancellationException -> throw e
             }
         }
-        return Either.Failed("")
+        return Either.Failed()
     }
 
     override suspend fun getNewsBySearch(q: String): Either<NewsAPIModel?> {
@@ -135,12 +132,12 @@ class NetworkDataRepository @Inject constructor(
                 newsApiServices.getLatestNewsBySearch(NetworkEndPoints.NEWS_ENDPOINT.url, q)
             if (response != null) {
                 if (response.isSuccessful && response.body() != null) {
-                    Log.d("TopicNEWS", response.body().toString())
+
 
                     return Either.Success(response.body())
                 }
             }
-            Log.d("TopicNEWS", response?.code().toString())
+
 
         } catch (e: Exception) {
             Log.d("TopicNEWS", e.toString())
@@ -148,7 +145,7 @@ class NetworkDataRepository @Inject constructor(
                 is CancellationException -> throw e
             }
         }
-        return Either.Failed("")
+        return Either.Failed()
     }
 }
 

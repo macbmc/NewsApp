@@ -63,7 +63,13 @@ fun OnBoardScreen(mViewModel: MainViewModel) {
         pagerState.animateScrollToPage(page = page, animationSpec = tween(durationMillis = 1000))
     }
     NewsAppTheme(darkTheme = isDarkMode!!) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background), verticalArrangement = Arrangement.Center) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
+            verticalArrangement = Arrangement.Center
+        ) {
 
 
             if (!appOpen!!) {
@@ -112,7 +118,7 @@ fun OnBoardScreen(mViewModel: MainViewModel) {
                                         animateScrollToPage(pagerState.currentPage - 1)
                                     }
 
-                                }) else null
+                                })
                             Spacer(modifier = Modifier.width(10.dp))
                             if (!buttonsState.value[1].isNullOrEmpty()) CustomButton(
                                 title = buttonsState.value[1].toString(),
@@ -122,7 +128,7 @@ fun OnBoardScreen(mViewModel: MainViewModel) {
                                             mViewModel.setToHomeState()
                                         else animateScrollToPage(pagerState.currentPage + 1)
                                     }
-                                }) else null
+                                })
 
 
                         }

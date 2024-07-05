@@ -47,7 +47,7 @@ fun CategoryNewsComponents(viewModel: HomeViewModel) {
             modifier = Modifier
                 .fillMaxSize()
                 .background(shape = RoundedCornerShape(20.dp), color = Color.LightGray)
-                .padding(vertical = 20.dp),
+                .padding(vertical = 30.dp),
         )
     }
 

@@ -73,19 +73,19 @@ fun HomeScreen(mViewModel: HomeViewModel) {
     val drawerState = rememberDrawerState(androidx.compose.material.DrawerValue.Closed)
     NewsAppTheme(darkTheme = darkModeState.value!!) {
         ModalDrawer(
-            drawerState =drawerState,
+            drawerState = drawerState,
             drawerContent = {
-                DrawerComponent(modeCheckState =darkModeState.value!!, onChangeCheckState ={
+                DrawerComponent(modeCheckState = darkModeState.value!!, onChangeCheckState = {
                     mViewModel.changeUIMode(darkModeState.value!!)
                 })
             }, content = {
-                Box(modifier = Modifier.background(color = androidx.compose.material3.MaterialTheme.colorScheme.background) )
+                Box(modifier = Modifier.background(color = MaterialTheme.colorScheme.background))
                 {
                     Column(
                         Modifier
                             .fillMaxSize()
                             .padding(5.dp)
-                            .background(color = androidx.compose.material3.MaterialTheme.colorScheme.background)
+                            .background(color = MaterialTheme.colorScheme.background)
                     ) {
 
                         TopNavRow(mViewModel, drawerState)
@@ -93,7 +93,7 @@ fun HomeScreen(mViewModel: HomeViewModel) {
                         LocationComponent(mViewModel)
                         Spacer(modifier = Modifier.height(10.dp))
                         if (!list.value.isNullOrEmpty()) {
-                            LazyRow() {
+                            LazyRow {
                                 items(list.value!!) {
                                     SuggestionComponent(str = it.topic, mViewModel)
                                     Spacer(Modifier.width(5.dp))
@@ -103,7 +103,7 @@ fun HomeScreen(mViewModel: HomeViewModel) {
 
                         if (screenHomeState.value!!) {
                             if (newsList.value != null) {
-                                PageBannerComponent(newsList.value!![0],mViewModel)
+                                PageBannerComponent(newsList.value!![0], mViewModel)
                                 LazyColumn {
                                     items(newsList.value!!.filter {
                                         it.content != "[Removed]"
@@ -120,7 +120,7 @@ fun HomeScreen(mViewModel: HomeViewModel) {
                                         .padding(vertical = 10.dp),
                                     verticalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    PageBannerComponent(null,mViewModel)
+                                    PageBannerComponent(null, mViewModel)
                                     NewsBannerComponent(null, mViewModel)
                                     NewsBannerComponent(null, mViewModel)
                                     NewsBannerComponent(null, mViewModel)
@@ -132,7 +132,6 @@ fun HomeScreen(mViewModel: HomeViewModel) {
                         }
                     }
                 }
-
 
 
             })
@@ -191,7 +190,6 @@ fun TopNavRow(mViewModel: HomeViewModel, drawerState: DrawerState) {
     val searchState = remember {
         mutableStateOf(false)
     }
-    val isDarkMode by mViewModel.isDarkMode.observeAsState()
     val searchText = remember {
         mutableStateOf("")
     }
@@ -206,8 +204,8 @@ fun TopNavRow(mViewModel: HomeViewModel, drawerState: DrawerState) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                tint=MaterialTheme.colorScheme.onBackground,
-                painter = if (homeState.value!!) painterResource(id =R.drawable.ic_menu_light) else painterResource(
+                tint = MaterialTheme.colorScheme.onBackground,
+                painter = if (homeState.value!!) painterResource(id = R.drawable.ic_menu_light) else painterResource(
                     id = R.drawable.ic_home
                 ),
                 contentDescription = null,
@@ -232,7 +230,7 @@ fun TopNavRow(mViewModel: HomeViewModel, drawerState: DrawerState) {
                     searchText.value = text
                 },
                 searchState = searchState.value,
-                onSearch = { text ->
+                onSearch = { _ ->
                     scope.launch {
                         mViewModel.newsOnTopic(searchText.value)
                         searchState.value = false
@@ -288,7 +286,11 @@ fun LocationComponent(viewModel: HomeViewModel) {
                 showBottomSheet.value = true
             }
         }) {
-            Icon(painter =painterResource(id = R.drawable.ic_location), tint = MaterialTheme.colorScheme.onBackground, contentDescription = null)
+            Icon(
+                painter = painterResource(id = R.drawable.ic_location),
+                tint = MaterialTheme.colorScheme.onBackground,
+                contentDescription = null
+            )
             Text(text = location!!, color = MaterialTheme.colorScheme.onBackground)
         }
 
@@ -315,11 +317,14 @@ fun LocationComponent(viewModel: HomeViewModel) {
                         ) {
                             Text(
                                 text = item.country,
-                                color = MaterialTheme.colorScheme.onPrimary,
+                                color = MaterialTheme.colorScheme.onBackground,
                                 modifier = Modifier.weight(1f)
                             )
                             Spacer(Modifier.width(10.dp))
-                            Text(text = item.countryCode, color = MaterialTheme.colorScheme.onPrimary)
+                            Text(
+                                text = item.countryCode,
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
                         }
 
                     }
@@ -405,7 +410,7 @@ fun NewsBannerComponent(newsModel: NewsAPIModel.Article?, mViewModel: HomeViewMo
 }
 
 @Composable
-fun PageBannerComponent(newsModel: NewsAPIModel.Article?,mViewModel: HomeViewModel) {
+fun PageBannerComponent(newsModel: NewsAPIModel.Article?, mViewModel: HomeViewModel) {
     val scope = rememberCoroutineScope()
     if (newsModel != null) {
         val painter = rememberAsyncImagePainter(
@@ -469,17 +474,26 @@ fun DrawerComponent(modeCheckState: Boolean, onChangeCheckState: (Boolean) -> Un
     Column(
         Modifier
             .fillMaxSize()
-            .background(androidx.compose.material3.MaterialTheme.colorScheme.background)
-            .padding(10.dp)) {
-        Image(painter = painterResource(id = R.drawable.ic_logo),contentDescription = null,
+            .background(MaterialTheme.colorScheme.background)
+            .padding(10.dp)
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.ic_logo), contentDescription = null,
             Modifier
                 .height(100.dp)
-                .width(100.dp))
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceAround) {
-                Text(text = "Dark Mode", color = MaterialTheme.colorScheme.onBackground)
-                Switch(checked = modeCheckState, onCheckedChange = { scope.launch{
+                .width(100.dp)
+        )
+        Row(
+            Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            Text(text = "Dark Mode", color = MaterialTheme.colorScheme.onBackground)
+            Switch(checked = modeCheckState, onCheckedChange = {
+                scope.launch {
                     onChangeCheckState(modeCheckState)
-                } })
+                }
+            })
 
         }
     }
