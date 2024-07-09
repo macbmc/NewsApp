@@ -1,6 +1,7 @@
 package com.loc.newsapp.domain.useCases
 
 import android.content.SharedPreferences
+import android.util.Log
 import com.loc.newsapp.data.entity.NewsAPIModel
 import com.loc.newsapp.domain.repositories.NetworkRepository
 import com.loc.newsapp.utils.Either
@@ -43,7 +44,10 @@ class GetLatestNewsUseCase(
                     emit(response.data?.articles as List<NewsAPIModel.Article>)
                 }
 
-                else -> emit(null)
+                else -> {
+                    Log.d("LatestNewsNull",response.toString())
+                    emit(null)
+                }
             }
         }
     }

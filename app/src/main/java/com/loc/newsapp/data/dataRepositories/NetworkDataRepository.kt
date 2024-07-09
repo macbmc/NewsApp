@@ -93,6 +93,10 @@ class NetworkDataRepository @Inject constructor(
                     return Either.Success(response.body())
                 }
             }
+            else
+            {
+                return Either.Failed()
+            }
 
 
         } catch (e: Exception) {

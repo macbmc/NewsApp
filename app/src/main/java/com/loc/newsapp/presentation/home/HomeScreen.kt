@@ -102,18 +102,7 @@ fun HomeScreen(mViewModel: HomeViewModel) {
                         }
 
                         if (screenHomeState.value!!) {
-                            if (newsList.value != null) {
-                                PageBannerComponent(newsList.value!![0], mViewModel)
-                                LazyColumn {
-                                    items(newsList.value!!.filter {
-                                        it.content != "[Removed]"
-                                    }) { message ->
-                                        NewsBannerComponent(message, mViewModel)
-                                    }
-                                }
-
-
-                            } else {
+                            if (newsList.value.isNullOrEmpty()) {
                                 Column(
                                     Modifier
                                         .fillMaxSize()
@@ -125,6 +114,18 @@ fun HomeScreen(mViewModel: HomeViewModel) {
                                     NewsBannerComponent(null, mViewModel)
                                     NewsBannerComponent(null, mViewModel)
                                 }
+
+                            } else {
+
+                                PageBannerComponent(newsList.value!![0], mViewModel)
+                                LazyColumn {
+                                    items(newsList.value!!.filter {
+                                        it.content != "[Removed]"
+                                    }) { message ->
+                                        NewsBannerComponent(message, mViewModel)
+                                    }
+                                }
+
                             }
 
                         } else {
