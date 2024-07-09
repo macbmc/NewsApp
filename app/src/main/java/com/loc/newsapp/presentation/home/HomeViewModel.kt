@@ -46,7 +46,6 @@ class HomeViewModel @Inject constructor(
 
 
     fun initHome() {
-        sharedPreferences.edit().putBoolean("APP_DARK_MODE", true).apply()
         getLatestTopics()
         getLocation()
         getLatestNews()
@@ -107,7 +106,6 @@ class HomeViewModel @Inject constructor(
     private fun getLatestNews() {
         viewModelScope.launch(Dispatchers.IO) {
             latestNewsUseCase.execute().collect {
-                Log.d("newcountrylivedata",it.toString())
                 latestNewsList.postValue(it)
 
             }

@@ -95,7 +95,6 @@ class NetworkDataRepository @Inject constructor(
             }
             else
             {
-                Log.d("LatestNewsNull","Called")
                 return Either.Failed()
             }
 
