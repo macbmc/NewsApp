@@ -3,6 +3,7 @@ package com.loc.newsapp.presentation.home
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.material3.Text
@@ -40,6 +41,21 @@ class HomeActivity : BaseActivity<HomeViewModel>() {
         mViewModel.getNetworkStatus()
         openLinkUrl()
         observeNetwork()
+        observeNewsList()
+    }
+
+    private fun observeNewsList() {
+        mViewModel.latestNewsList.observe(this@HomeActivity)
+        {
+            when(it)
+            {
+                null ->{}
+                else ->{
+                    if(it.isEmpty())
+                        Toast.makeText(this,"No news found",Toast.LENGTH_LONG).show()
+                }
+            }
+        }
     }
 
     private fun observeNetwork() {

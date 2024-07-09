@@ -93,6 +93,11 @@ class NetworkDataRepository @Inject constructor(
                     return Either.Success(response.body())
                 }
             }
+            else
+            {
+                Log.d("LatestNewsNull","Called")
+                return Either.Failed()
+            }
 
 
         } catch (e: Exception) {
