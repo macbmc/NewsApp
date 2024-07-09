@@ -8,6 +8,11 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.loc.newsapp.BaseActivity
 import com.loc.newsapp.data.entity.ConnectivityClass
@@ -36,6 +41,12 @@ class MainActivity : BaseActivity<MainViewModel>() {
         getCurrentDeviceLocation()
         observeAppReadyState()
         installSplashScreen().setKeepOnScreenCondition { keepSplashCondition }
+        setContent {
+            Box(modifier = Modifier.fillMaxSize())
+            {
+                CircularProgressIndicator(Modifier.align(Alignment.Center))
+            }
+        }
 
     }
 

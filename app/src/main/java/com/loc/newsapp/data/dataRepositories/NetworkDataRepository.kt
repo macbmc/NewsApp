@@ -41,7 +41,7 @@ class NetworkDataRepository @Inject constructor(
                 countryAPIService.getCountryService(NetworkEndPoints.COUNTRIES_ENDPOINT.url)
             if (response.isSuccessful && response.body() != null) {
 
-
+                Log.d("CountryData",response.body().toString())
                 return Either.Success(DataConversion().countryResponseToCountryData(response.body()!!))
             }
 
