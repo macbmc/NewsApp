@@ -13,4 +13,4 @@
 .externalNativeBuild
 .cxx
 local.properties
-NewsApp.properties
+NewsProperties.properties
