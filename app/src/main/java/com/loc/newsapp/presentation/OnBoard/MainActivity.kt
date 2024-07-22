@@ -36,78 +36,78 @@ class MainActivity : BaseActivity<MainViewModel>() {
             }
         }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        getCurrentDeviceLocation()
-        observeAppReadyState()
-        installSplashScreen().setKeepOnScreenCondition { keepSplashCondition }
-        setContent {
-            Box(modifier = Modifier.fillMaxSize())
-            {
-                CircularProgressIndicator(Modifier.align(Alignment.Center))
+            override fun onCreate(savedInstanceState: Bundle?) {
+                super.onCreate(savedInstanceState)
+                getCurrentDeviceLocation()
+                observeAppReadyState()
+                installSplashScreen().setKeepOnScreenCondition { keepSplashCondition }
+                setContent {
+                    Box(modifier = Modifier.fillMaxSize())
+                    {
+                        CircularProgressIndicator(Modifier.align(Alignment.Center))
+                    }
+                }
+
             }
-        }
-
-    }
 
 
-    private fun getCurrentDeviceLocation() {
+            private fun getCurrentDeviceLocation() {
 
-        if (checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            mViewModel.location()
-        } else locationPermission.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
+                if (checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    mViewModel.location()
+                } else locationPermission.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
 
-    }
+            }
 
 
-    private fun observeAppReadyState() {
-        mViewModel.apply {
-            observeNetworkStatus()
-            getOnBoardData()
+            private fun observeAppReadyState() {
+                mViewModel.apply {
+                    observeNetworkStatus()
+                    getOnBoardData()
 
-            isAppReady.observe(this@MainActivity) { appReady ->
-                when (appReady) {
-                    true -> {
-                        keepSplashCondition = false
-                        networkStatus.observe(this@MainActivity) { status ->
-                            when (status) {
-                                is ConnectivityClass.Connected -> {
-                                    openHomeState.observe(this@MainActivity) {
-                                        if (it) {
-                                            setLocation.observe(this@MainActivity)
-                                            { location ->
-                                                if (location) {
-                                                    startActivity(
-                                                        Intent(
-                                                            this@MainActivity,
-                                                            HomeActivity::class.java
-                                                        )
-                                                    )
+                    isAppReady.observe(this@MainActivity) { appReady ->
+                        when (appReady) {
+                            true -> {
+                                keepSplashCondition = false
+                                networkStatus.observe(this@MainActivity) { status ->
+                                    when (status) {
+                                        is ConnectivityClass.Connected -> {
+                                            openHomeState.observe(this@MainActivity) {
+                                                if (it) {
+                                                    setLocation.observe(this@MainActivity)
+                                                    { location ->
+                                                        if (location) {
+                                                            startActivity(
+                                                                Intent(
+                                                                    this@MainActivity,
+                                                                    HomeActivity::class.java
+                                                                )
+                                                            )
 
+                                                        }
+                                                    }
+                                                } else {
+                                                    setContent {
+                                                        OnBoardScreen(mViewModel)
+                                                    }
                                                 }
                                             }
-                                        } else {
-                                            setContent {
-                                                OnBoardScreen(mViewModel)
-                                            }
                                         }
+
+                                        else -> setContent { LoadingScreen() }
                                     }
                                 }
 
-                                else -> setContent { LoadingScreen() }
+
+                            }
+
+                            false -> {
+                                keepSplashCondition = true
                             }
                         }
-
-
-                    }
-
-                    false -> {
-                        keepSplashCondition = true
                     }
                 }
             }
         }
-    }
-}
 
 
