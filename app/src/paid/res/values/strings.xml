@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">NewsApp</string>
+    <string name="Resource_Fetch_Error">Something went wrong </string>
+    <string name="title_activity_home">HomeActivity</string>
+    <string name="onBoardnext">Next</string>
+    <string name="onBoardback">Back</string>
+    <string name="onBoardgetStarted">Get Started</string>
+</resources>
